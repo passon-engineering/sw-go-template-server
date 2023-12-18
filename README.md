@@ -1,8 +1,12 @@
+Here's the updated README to reflect the new functionality and usage instructions for your `sw-go-template-server`:
+
+---
+
 # sw-go-template-server
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Welcome to the `sw-go-template-server` repository! This is a foundational Golang server template that offers HTTPS/HTTP support out-of-the-box. It is designed with extensibility in mind, allowing you to easily integrate hardware I/O, various databases, and other functionalities as you see fit.
+Welcome to the `sw-go-template-server` repository! This foundational Golang server template offers flexible HTTPS/HTTP support out-of-the-box. Designed for extensibility, it easily integrates hardware I/O, various databases, and other functionalities, making it ideal for a wide range of applications.
 
 ## Table of Contents
 
@@ -11,22 +15,23 @@ Welcome to the `sw-go-template-server` repository! This is a foundational Golang
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Usage](#usage)
+- [Configuration](#configuration)
 - [Contributing](#contributing)
 - [License](#license)
 
 ## Features
 
-- **Basic HTTP/HTTPS Support**: Ready to launch with security in mind.
-- **Modular Architecture**: Designed for seamless integration of additional modules such as databases, hardware I/O, and other custom functionality.
-- **Scalability**: Efficiently designed for both small and large-scale deployments.
+- **Flexible HTTP/HTTPS Support**: Configurable for secure (HTTPS) and regular (HTTP) communication.
+- **Modular Architecture**: Easily integrate additional modules like databases, hardware I/O, and custom functionalities.
+- **Scalability**: Efficiently handles both small and large-scale deployments.
 
 ## Getting Started
 
-To get a local copy up and running, follow the installation steps.
+To get a local copy up and running, follow these installation steps.
 
 ### Prerequisites
 
-- [Go (Golang)](https://golang.org/dl/) - Tested with version `1.x`, but newer versions are likely compatible.
+- [Go (Golang)](https://golang.org/dl/) - Tested with version `1.20`, but newer versions are likely compatible.
 
 ### Installation
 
@@ -42,10 +47,19 @@ To get a local copy up and running, follow the installation steps.
     cd sw-go-template-server
     ```
 
-3. **Build the Project**
+3. **Choose the Environment in build.sh**
+
+    Uncomment your choice:
+    ```bash
+    GOOS=linux GOARCH=amd64 go build -o $SCRIPT_DIR/$PACKAGE_NAME-amd64-linux $SCRIPT_DIR/main.go
+    #GOOS=linux GOARCH=arm64 go build -o $SCRIPT_DIR/$PACKAGE_NAME-arm64-linux $SCRIPT_DIR/main.go
+    #GOOS=darwin GOARCH=arm64 go build -o $SCRIPT_DIR/$PACKAGE_NAME-arm64-darwin $SCRIPT_DIR/main.go
+    ```
+
+4. **Build the Project**
 
     ```bash
-    go build
+    ./build
     ```
 
 ## Usage
@@ -54,31 +68,44 @@ After successfully building the project:
 
 1. **Start the Server**
 
+    For HTTP:
     ```bash
-    ./sw-go-template-server
+    ./sw-go-template-server -http="localhost:8080" -tlscert="" -tlskey=""
     ```
 
-Visit `http://localhost:8080` (or `https://localhost:8443` for HTTPS) to access the server.
+    For HTTPS:
+    ```bash
+    ./sw-go-template-server -http="localhost:8443" -tlscert="/path/to/fullchain.pem" -tlskey="/path/to/privkey.pem"
+    ```
 
-**Note**: You might need to configure SSL/TLS certificates for HTTPS. Follow [this guide](https://letsencrypt.org/getting-started/) for obtaining free certificates from Let's Encrypt.
+    Visit `http://localhost:8080` for HTTP or `https://localhost:8443` for HTTPS to access the server.
+
+**Note**: For HTTPS, configure SSL/TLS certificates appropriately. Follow [this guide](https://letsencrypt.org/getting-started/) for obtaining free certificates from Let's Encrypt.
+
+## Configuration
+
+- The server can be configured to run in either HTTP or HTTPS mode.
+- SSL/TLS certificates are required for HTTPS.
+- Command-line flags allow dynamic configuration of server parameters like address and SSL certificate paths.
 
 ## Contributing
 
-We welcome contributions! If you'd like to contribute:
+We welcome contributions! Here's how you can contribute:
 
 1. **Fork the Project**: Use the 'Fork' button at the top right of this page.
 2. **Clone Your Fork**: `git clone https://github.com/YOUR_USERNAME/sw-go-template-server.git`
 3. **Navigate to Your Clone**: `cd sw-go-template-server`
 4. **Create a New Branch**: `git checkout -b new-feature`
-5. **Make Changes**: Add your new features or bug fixes.
+5. **Make Changes**: Add new features or fix bugs.
 6. **Push**: `git push origin new-feature`
-7. **Open a Pull Request**: Navigate back to your fork on GitHub and click 'New pull request'.
+7. **Open a Pull Request**: Go back to your fork on GitHub and click 'New pull request'.
 
 ## License
 
 Distributed under the MIT License. See `LICENSE` for more information.
 
-
 ---
 
-Crafted with pass(i)on by the [passon-engineering](https://github.com/passon-engineering) team!
+Crafted with pass(i)on by [passon-engineering](https://github.com/passon-engineering)!
+
+---
