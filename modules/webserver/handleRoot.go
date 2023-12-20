@@ -29,7 +29,7 @@ func handleRoot(app *application.Application) http.HandlerFunc {
 			http.ServeFile(w, r, filepath.Join(basePath, "index.html"))
 
 			app.Logger.Entry(logger.Container{
-				Status:         logger.STATUS_WARN,
+				Status:         logger.STATUS_INFO,
 				Source:         "handleRoot",
 				Info:           "served",
 				HttpRequest:    r,
