@@ -31,8 +31,5 @@ user.yml
 # Ignore everything in the "frontend" folder
 frontend/*
 
-# But include the "frontend" folder itself
-!frontend/
-
 # Ignore all binarys
 sw-go-template-server*
