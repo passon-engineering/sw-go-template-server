@@ -27,3 +27,9 @@ Thumbs.db
 # Custom user generated configurations which will not be removed/overwritten during git pull
 user.yaml
 user.yml
+
+# Ignore everything in the "frontend" folder
+frontend/*
+
+# But include the "frontend" folder itself
+!frontend/
