@@ -23,9 +23,10 @@ type Config struct {
 	WebTlsCert   string
 	WebTlsKey    string
 	WebDirectory string
+	LogDirectory string
 }
 
-func Init() *Application {
+func Init(config Config) *Application {
 	startTime := time.Now()
 	var err error
 
@@ -33,7 +34,11 @@ func Init() *Application {
 		ServerPath: filepath.Dir(os.Args[0]),
 		SystemIP:   "",
 		Logger:     &logger.Logger{},
+		Config:     config,
 	}
+
+	// Determine if logs should be written to a file based on the LogDirectory configuration
+	outputToFile := app.Config.LogDirectory != ""
 
 	app.Logger, err = logger.NewLogger(
 		[]logger.LogFormat{
@@ -49,11 +54,11 @@ func Init() *Application {
 			logger.FORMAT_PROCESSING_TIME,
 		}, logger.Options{
 			OutputToStdout:   true,
-			OutputToFile:     true,
-			OutputFolderPath: app.ServerPath + "/logs/",
+			OutputToFile:     outputToFile,
+			OutputFolderPath: app.Config.LogDirectory,
 		}, logger.Container{
 			Status: logger.STATUS_INFO,
-			Info:   "System Logger succesfully started! Awaiting logger tasks...",
+			Info:   "System Logger succesfully started! Writing log files to: " + app.Config.LogDirectory + ". Awaiting logger tasks...",
 		})
 	if err != nil {
 		log.Fatalf("Could not initialize logger: %v", err)

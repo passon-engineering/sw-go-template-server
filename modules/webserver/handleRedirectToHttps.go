@@ -37,5 +37,4 @@ func handleRedirectToHttps(app *application.Application) {
 			return
 		}
 	}()
-
 }

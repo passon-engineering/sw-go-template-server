@@ -13,19 +13,22 @@ func main() {
 	webTlsCert := flag.String("tlscert", "/etc/letsencrypt/live/example.com/fullchain.pem", "Web TLS certificate")
 	webTlsKey := flag.String("tlskey", "/etc/letsencrypt/live/example.com/privkey.pem", "Web TLS key")
 	webDirectory := flag.String("webdir", "/frontend/", "Web directory")
+	logDirectory := flag.String("logdir", "", "Log directory")
 
 	// Parse the flags
 	flag.Parse()
 
-	// Initialize the application
-	app := application.Init()
-
+	config := application.Config{}
 	// Set configuration using flags
-	app.Config.HttpAddress = *httpAddress
-	app.Config.HttpsAddress = *httpsAddress
-	app.Config.WebTlsCert = *webTlsCert
-	app.Config.WebTlsKey = *webTlsKey
-	app.Config.WebDirectory = *webDirectory
+	config.HttpAddress = *httpAddress
+	config.HttpsAddress = *httpsAddress
+	config.WebTlsCert = *webTlsCert
+	config.WebTlsKey = *webTlsKey
+	config.WebDirectory = *webDirectory
+	config.LogDirectory = *logDirectory
+
+	// Initialize the application
+	app := application.Init(config)
 
 	// Initialize webserver
 	webserver.Init(app)
