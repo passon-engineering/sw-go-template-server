@@ -39,6 +39,11 @@ func Init(config Config) *Application {
 
 	// Determine if logs should be written to a file based on the LogDirectory configuration
 	outputToFile := app.Config.LogDirectory != ""
+	logOutputDefinition := "Logging to files disabled - none or unvalid path provided."
+
+	if outputToFile {
+		logOutputDefinition = "Writing log files to: " + app.Config.LogDirectory
+	}
 
 	app.Logger, err = logger.NewLogger(
 		[]logger.LogFormat{
@@ -58,7 +63,7 @@ func Init(config Config) *Application {
 			OutputFolderPath: app.Config.LogDirectory,
 		}, logger.Container{
 			Status: logger.STATUS_INFO,
-			Info:   "System Logger succesfully started! Writing log files to: " + app.Config.LogDirectory + ". Awaiting logger tasks...",
+			Info:   "System Logger succesfully started! Awaiting logger tasks. " + logOutputDefinition,
 		})
 	if err != nil {
 		log.Fatalf("Could not initialize logger: %v", err)
