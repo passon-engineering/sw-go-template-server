@@ -9,10 +9,13 @@ import (
 )
 
 func handleRedirectToHttps(app *application.Application) {
-	startTime := time.Now()
 	redirectServer := &http.Server{
 		Addr: app.Config.HttpAddress,
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			startTime := time.Now()
+
+			u := "https://" + app.Config.HttpsAddress + r.RequestURI
+			http.Redirect(w, r, u, http.StatusMovedPermanently)
 
 			app.Logger.Entry(logger.Container{
 				Status:         logger.STATUS_INFO,
@@ -20,9 +23,6 @@ func handleRedirectToHttps(app *application.Application) {
 				HttpRequest:    r,
 				ProcessingTime: time.Since(startTime),
 			})
-
-			u := "https://" + app.Config.HttpsAddress + r.RequestURI
-			http.Redirect(w, r, u, http.StatusMovedPermanently)
 		}),
 		WriteTimeout: 2 * time.Second,
 		ReadTimeout:  2 * time.Second,
@@ -31,10 +31,9 @@ func handleRedirectToHttps(app *application.Application) {
 	go func() {
 		if err := redirectServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			app.Logger.Entry(logger.Container{
-				Status:         logger.STATUS_ERROR,
-				Source:         "handleRedirectToHttps",
-				Info:           "could not redirect: " + err.Error(),
-				ProcessingTime: time.Since(startTime),
+				Status: logger.STATUS_ERROR,
+				Source: "handleRedirectToHttps",
+				Info:   "could not redirect: " + err.Error(),
 			})
 			return
 		}
