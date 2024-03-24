@@ -11,7 +11,6 @@ import (
 )
 
 func handleRoot(app *application.Application) http.HandlerFunc {
-	// Precompute the base path
 	basePath := filepath.Join(app.ServerPath, app.Config.WebDirectory)
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -24,26 +23,32 @@ func handleRoot(app *application.Application) http.HandlerFunc {
 
 		fullPath := filepath.Join(basePath, path)
 
-		_, err := os.Stat(fullPath)
-		if err != nil && os.IsNotExist(err) {
-			http.ServeFile(w, r, filepath.Join(basePath, "index.html"))
+		// Check if the requested file exists and is not a directory
+		info, err := os.Stat(fullPath)
+		if os.IsNotExist(err) || err != nil || info.IsDir() {
+			// Log the error if it's not a simple case of the file not existing
+			if err != nil && !os.IsNotExist(err) {
+				app.Logger.Entry(logger.Container{
+					Status:         logger.STATUS_ERROR,
+					Source:         "handleRoot",
+					Info:           "error checking file: " + err.Error(),
+					HttpRequest:    r,
+					ProcessingTime: time.Since(startTime),
+				})
+			}
 
-			app.Logger.Entry(logger.Container{
-				Status:         logger.STATUS_INFO,
-				Source:         "handleRoot",
-				Info:           "served",
-				HttpRequest:    r,
-				ProcessingTime: time.Since(startTime),
-			})
-			return
+			// Serve the default file if the requested file does not exist or any error occurs
+			http.ServeFile(w, r, filepath.Join(basePath, "index.html"))
+		} else {
+			// Serve the requested file
+			http.ServeFile(w, r, fullPath)
 		}
 
-		http.ServeFile(w, r, fullPath)
-
+		// Log successful file serve
 		app.Logger.Entry(logger.Container{
 			Status:         logger.STATUS_INFO,
 			Source:         "handleRoot",
-			Info:           "served",
+			Info:           "served " + path,
 			HttpRequest:    r,
 			ProcessingTime: time.Since(startTime),
 		})
