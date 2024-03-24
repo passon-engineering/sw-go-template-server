@@ -24,6 +24,8 @@ func handleRedirectToHttps(app *application.Application) {
 			u := "https://" + app.Config.HttpsAddress + r.RequestURI
 			http.Redirect(w, r, u, http.StatusMovedPermanently)
 		}),
+		WriteTimeout: 2 * time.Second,
+		ReadTimeout:  2 * time.Second,
 	}
 
 	go func() {
