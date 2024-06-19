@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/passon-engineering/sw-go-logger-lib/logger"
+	"github.com/tpasson/sw-go-logger-lib/logger"
 )
 
 // customLogWriter redirects log messages to the application's custom logger.

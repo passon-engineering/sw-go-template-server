@@ -5,7 +5,7 @@ import (
 	"sw-go-template-server/modules/application"
 	"time"
 
-	"github.com/passon-engineering/sw-go-logger-lib/logger"
+	"github.com/tpasson/sw-go-logger-lib/logger"
 )
 
 func handleRedirectToHttps(app *application.Application) {

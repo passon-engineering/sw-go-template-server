@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/passon-engineering/sw-go-logger-lib/logger"
-	"github.com/passon-engineering/sw-go-utility-lib/networking"
+	"github.com/tpasson/sw-go-logger-lib/logger"
+	"github.com/tpasson/sw-go-utility-lib/networking"
 )
 
 type Application struct {
