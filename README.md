@@ -82,6 +82,37 @@ After successfully building the project:
 
 **Note**: For HTTPS, configure SSL/TLS certificates appropriately. Follow [this guide](https://letsencrypt.org/getting-started/) for obtaining free certificates from Let's Encrypt.
 
+2. **Testing**
+
+You can use `curl` to test the issuing of certificates (cookie tokens for authentication). Follow the steps below:
+
+**Login to Obtain Authentication Token**
+
+   Use the following `curl` command to log in and save the authentication token in a cookie file (`cookies.txt`):
+
+   ```bash
+   curl -v -X POST http://localhost:8080/login -d '{"username":"your_username", "password":"your_password"}' -H "Content-Type: application/json" -c cookies.txt
+   ```
+
+**Access Protected Content with Authentication Token**
+
+   After logging in, use the saved cookie to access the protected content:
+
+   ```bash
+   curl -v -X GET http://localhost:8080/content -b cookies.txt
+   ```
+
+**Verify Access Without Authentication**
+
+   To verify that the server does not send the protected content without authentication, use the following command without specifying the cookie file:
+
+   ```bash
+   curl -v -X GET http://localhost:8080/content -b
+   ```
+
+Replace `your_username` and `your_password` with your actual login credentials.
+
+
 ## Configuration
 
 - The server can be configured to run in either HTTP or HTTPS mode.
@@ -106,6 +137,6 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
 
-Crafted with pass(i)on by [passon-engineering](https://github.com/passon-engineering)!
+Crafted with pass(i)on by [tpasson](https://github.com/tpasson)!
 
 ---

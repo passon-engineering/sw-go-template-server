@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"sw-go-template-server/modules/application"
 	"time"
 
 	"github.com/tpasson/sw-go-logger-lib/logger"
+	"github.com/tpasson/sw-go-template-server/modules/application"
 )
 
 func handleRoot(app *application.Application) http.HandlerFunc {

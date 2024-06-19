@@ -2,8 +2,9 @@ package main
 
 import (
 	"flag"
-	"sw-go-template-server/modules/application"
-	"sw-go-template-server/modules/webserver"
+
+	"github.com/tpasson/sw-go-template-server/modules/application"
+	"github.com/tpasson/sw-go-template-server/modules/webserver"
 )
 
 func main() {

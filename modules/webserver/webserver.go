@@ -1,15 +1,31 @@
 package webserver
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"os"
-	"sw-go-template-server/modules/application"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/gorilla/mux"
 	"github.com/tpasson/sw-go-logger-lib/logger"
+	"github.com/tpasson/sw-go-template-server/modules/application"
 )
+
+var jwtKey = []byte("your_secret_key")
+
+// Credentials struct to read the username and password from the request body
+type Credentials struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+// Claims struct to be encoded in the JWT
+type Claims struct {
+	Username string `json:"username"`
+	jwt.RegisteredClaims
+}
 
 // customLogWriter redirects log messages to the application's custom logger.
 type customLogWriter struct {
@@ -32,6 +48,10 @@ func Init(app *application.Application) {
 
 	router := mux.NewRouter()
 	router.NotFoundHandler = http.HandlerFunc(handleRoot(app))
+
+	// Authentication routes
+	router.HandleFunc("/login", loginHandler).Methods("POST")
+	router.HandleFunc("/content", authenticateMiddleware(handleContent)).Methods("GET")
 
 	server := http.Server{
 		Handler:      router,
@@ -60,6 +80,100 @@ func Init(app *application.Application) {
 			logFatal(app, "Could not initialize HTTP server: "+err.Error())
 		}
 	}
+}
+
+func loginHandler(w http.ResponseWriter, r *http.Request) {
+	var creds Credentials
+	err := json.NewDecoder(r.Body).Decode(&creds)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// Validate credentials (this is just a simple example, in production you should use a database)
+	if creds.Username != "your_username" || creds.Password != "your_password" {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	expirationTime := time.Now().Add(1 * time.Minute)
+	claims := &Claims{
+		Username: creds.Username,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expirationTime),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(jwtKey)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:    "token",
+		Value:   tokenString,
+		Expires: expirationTime,
+	})
+}
+
+func authenticateMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		c, err := r.Cookie("token")
+		if err != nil {
+			if err == http.ErrNoCookie {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		tknStr := c.Value
+		claims := &Claims{}
+
+		tkn, err := jwt.ParseWithClaims(tknStr, claims, func(token *jwt.Token) (interface{}, error) {
+			return jwtKey, nil
+		})
+
+		if err != nil {
+			if err == jwt.ErrSignatureInvalid {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		if !tkn.Valid {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		// Create a new token with updated expiration time
+		expirationTime := time.Now().Add(1 * time.Minute)
+		claims.ExpiresAt = jwt.NewNumericDate(expirationTime)
+		newToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		newTokenString, err := newToken.SignedString(jwtKey)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		// Set the new token as a cookie
+		http.SetCookie(w, &http.Cookie{
+			Name:    "token",
+			Value:   newTokenString,
+			Expires: expirationTime,
+		})
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func handleContent(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("This is the protected content!"))
 }
 
 func logFatal(app *application.Application, message string) {

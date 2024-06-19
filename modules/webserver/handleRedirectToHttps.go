@@ -2,10 +2,10 @@ package webserver
 
 import (
 	"net/http"
-	"sw-go-template-server/modules/application"
 	"time"
 
 	"github.com/tpasson/sw-go-logger-lib/logger"
+	"github.com/tpasson/sw-go-template-server/modules/application"
 )
 
 func handleRedirectToHttps(app *application.Application) {
