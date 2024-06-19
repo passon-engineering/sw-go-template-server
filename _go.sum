@@ -1,6 +1,0 @@
-github.com/gorilla/mux v1.8.0 h1:i40aqfkR1h2SlN9hojwV5ZA91wcXFOvkdNIeFDP5koI=
-github.com/gorilla/mux v1.8.0/go.mod h1:DVbg23sWSpFRCP0SfiEN6jmj59UnW/n46BH5rLB71So=
-github.com/passon-engineering/sw-go-logger-lib v0.3.1 h1:acg0GGPkOb77MFSGGaZyFBf+flK75y8TlRF3+wEa7jA=
-github.com/passon-engineering/sw-go-logger-lib v0.3.1/go.mod h1:mGDCo/ng8MctpnghpTSo/3iUOcfo1JcLcE19QaZ7czg=
-github.com/passon-engineering/sw-go-utility-lib v0.1.3 h1:13rHwfeAqo1n+5Jng1sWV0p+/MUbhjdYsxYKglvP1Jk=
-github.com/passon-engineering/sw-go-utility-lib v0.1.3/go.mod h1:uZUqiOP9fFXc77eGUvF5hRhqpdXm9fwQjui2R9/TYks=
