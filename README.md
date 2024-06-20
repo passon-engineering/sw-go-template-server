@@ -35,7 +35,7 @@ To get a local copy up and running, follow these installation steps.
 1. **Clone the Repo**
 
     ```bash
-    git clone https://github.com/passon-engineering/sw-go-template-server.git
+    git clone https://github.com/tpasson/sw-go-template-server.git
     ```
 
 2. **Navigate to the Directory**
