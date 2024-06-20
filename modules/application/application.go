@@ -1,6 +1,7 @@
 package application
 
 import (
+	"context"
 	"log"
 	"os"
 	"path/filepath"
@@ -8,13 +9,17 @@ import (
 
 	"github.com/tpasson/sw-go-logger-lib/logger"
 	"github.com/tpasson/sw-go-utility-lib/networking"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
 type Application struct {
-	ServerPath string
-	SystemIP   string
-	Logger     *logger.Logger
-	Config     Config
+	ServerPath  string
+	SystemIP    string
+	Logger      *logger.Logger
+	Config      Config
+	MongoClient *mongo.Client
 }
 
 type Config struct {
@@ -24,6 +29,7 @@ type Config struct {
 	WebTlsKey    string
 	WebDirectory string
 	LogDirectory string
+	MongoURL     string
 }
 
 func Init(config Config) *Application {
@@ -39,7 +45,7 @@ func Init(config Config) *Application {
 
 	// Determine if logs should be written to a file based on the LogDirectory configuration
 	outputToFile := app.Config.LogDirectory != ""
-	logOutputDefinition := "Logging to files disabled - none or unvalid path provided."
+	logOutputDefinition := "Logging to files disabled - none or invalid path provided."
 
 	if outputToFile {
 		logOutputDefinition = "Writing log files to: " + app.Config.LogDirectory
@@ -63,7 +69,7 @@ func Init(config Config) *Application {
 			OutputFolderPath: app.Config.LogDirectory,
 		}, logger.Container{
 			Status: logger.STATUS_INFO,
-			Info:   "System Logger succesfully started! Awaiting logger tasks. " + logOutputDefinition,
+			Info:   "System Logger successfully started! Awaiting logger tasks. " + logOutputDefinition,
 		})
 	if err != nil {
 		log.Fatalf("Could not initialize logger: %v", err)
@@ -90,15 +96,37 @@ func Init(config Config) *Application {
 
 	app.SystemIP = ip
 
+	// Initialize MongoDB client
+	clientOptions := options.Client().ApplyURI(app.Config.MongoURL)
+	mongoClient, err := mongo.Connect(context.TODO(), clientOptions)
+	if err != nil {
+		app.Logger.Entry(logger.Container{
+			Status: logger.STATUS_ERROR,
+			Error:  "Could not connect to MongoDB: " + err.Error(),
+		})
+	} else {
+		// Test the MongoDB connection
+		err = mongoClient.Ping(context.TODO(), readpref.Primary())
+		if err != nil {
+			app.Logger.Entry(logger.Container{
+				Status: logger.STATUS_ERROR,
+				Error:  "Could not ping MongoDB: " + err.Error(),
+			})
+		} else {
+			app.MongoClient = mongoClient
+			app.Logger.Entry(logger.Container{
+				Status:         logger.STATUS_INFO,
+				Info:           "Successfully connected to MongoDB",
+				ProcessingTime: time.Since(startTime),
+			})
+		}
+	}
+
 	app.Logger.Entry(logger.Container{
 		Status:         logger.STATUS_INFO,
-		Info:           "Basic app framework sucessfully initialized",
+		Info:           "Basic app framework successfully initialized",
 		ProcessingTime: time.Since(startTime),
 	})
-
-	if err != nil {
-		log.Fatalf("Could not initialize app! %v", err)
-	}
 
 	return app
 }

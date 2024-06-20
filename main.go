@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"os"
 
 	"github.com/tpasson/sw-go-template-server/modules/application"
 	"github.com/tpasson/sw-go-template-server/modules/webserver"
@@ -16,6 +17,13 @@ func main() {
 	webDirectory := flag.String("webdir", "/frontend/", "Web directory")
 	logDirectory := flag.String("logdir", "", "Log directory")
 
+	// Read MongoDB connection URL from environment variable
+	mongoURL := os.Getenv("MONGO_URL")
+	if mongoURL == "" {
+		mongoURL = "mongodb://localhost:27017" // Default value if not set in environment
+	}
+	mongoURLFlag := flag.String("mongourl", mongoURL, "MongoDB connection URL")
+
 	// Parse the flags
 	flag.Parse()
 
@@ -27,6 +35,7 @@ func main() {
 	config.WebTlsKey = *webTlsKey
 	config.WebDirectory = *webDirectory
 	config.LogDirectory = *logDirectory
+	config.MongoURL = *mongoURLFlag
 
 	// Initialize the application
 	app := application.Init(config)

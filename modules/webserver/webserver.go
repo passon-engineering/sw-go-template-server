@@ -1,6 +1,7 @@
 package webserver
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/tpasson/sw-go-logger-lib/logger"
 	"github.com/tpasson/sw-go-template-server/modules/application"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 var jwtKey = []byte("your_secret_key")
@@ -51,7 +53,7 @@ func Init(app *application.Application) {
 
 	// Authentication routes
 	router.HandleFunc("/login", loginHandler).Methods("POST")
-	router.HandleFunc("/content", authenticateMiddleware(handleContent)).Methods("GET")
+	router.HandleFunc("/content", authenticateMiddleware(handleContent(app))).Methods("GET")
 
 	server := http.Server{
 		Handler:      router,
@@ -172,8 +174,26 @@ func authenticateMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	})
 }
 
-func handleContent(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("This is the protected content!"))
+func handleContent(app *application.Application) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		collection := app.MongoClient.Database("your_database").Collection("your_collection")
+
+		cursor, err := collection.Find(context.TODO(), bson.M{})
+		if err != nil {
+			http.Error(w, "Failed to fetch data from MongoDB", http.StatusInternalServerError)
+			return
+		}
+		defer cursor.Close(context.TODO())
+
+		var parts []bson.M
+		if err := cursor.All(context.TODO(), &parts); err != nil {
+			http.Error(w, "Failed to parse MongoDB data", http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(parts)
+	}
 }
 
 func logFatal(app *application.Application, message string) {
